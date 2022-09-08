@@ -1,0 +1,2 @@
+const e=window.document.getElementById("start"),n=window.document.getElementById("log");function t(e){n.value+=e+"\n"}e.addEventListener("click",(()=>{const e=new NDEFReader;e.scan().then((()=>{t("Scan started successfully."),e.onreadingerror=()=>{t("Cannot read data from the NFC tag. Try another one?")},e.onreading=e=>{t("NDEF message read."),t(e.serialNumber),t(e.message.records.map(((e,n,t)=>{JSON.stringify(e)})).join("\n"))}})).catch((e=>{t(`Error! Scan failed to start: ${e}.`)}))}));
+//# sourceMappingURL=index.96ad0aa0.js.map
