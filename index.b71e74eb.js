@@ -536,22 +536,24 @@ const startButton = window.document.getElementById("start");
 const logText = window.document.getElementById("log");
 if ("serviceWorker" in navigator) navigator.serviceWorker.register(require("fce9dcdd8e6c6e32"));
 startButton.addEventListener("click", ()=>{
-    const ndef = new NDEFReader();
-    ndef.scan().then(()=>{
-        log("Scan started successfully.");
-        ndef.onreadingerror = ()=>{
-            log("Cannot read data from the NFC tag. Try another one?");
-        };
-        ndef.onreading = (event)=>{
-            log("NDEF message read.");
-            log(event.serialNumber);
-            log(event.message.records.map((v, i, a)=>{
-                JSON.stringify(v);
-            }).join("\n"));
-        };
-    }).catch((error)=>{
-        log(`Error! Scan failed to start: ${error}.`);
-    });
+    if ("NDEFReader" in window) {
+        const ndef = new NDEFReader();
+        ndef.scan().then(()=>{
+            log("Scan started successfully.");
+            ndef.onreadingerror = ()=>{
+                log("Cannot read data from the NFC tag. Try another one?");
+            };
+            ndef.onreading = (event)=>{
+                log("NDEF message read.");
+                log(event.serialNumber);
+                log(event.message.records.map((v, i, a)=>{
+                    JSON.stringify(v);
+                }).join("\n"));
+            };
+        }).catch((error)=>{
+            log(`Error! Scan failed to start: ${error}.`);
+        });
+    } else log("NDEFReader not in window");
 });
 function log(message) {
     logText.value += message + "\n";
