@@ -539,8 +539,14 @@ var _firebaseApp = require("./firebaseApp");
 const startButton = window.document.getElementById("start");
 const logText = window.document.getElementById("log");
 let devid = "None";
-if ("serviceWorker" in navigator) navigator.serviceWorker.register(require("fce9dcdd8e6c6e32"));
-startButton.addEventListener("click", ()=>{
+/*
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register(
+    new URL('sw.ts', import.meta.url),
+    {type: 'module'}
+  );
+}*/ startButton.addEventListener("click", ()=>{
+    pushData("start");
     if ("NDEFReader" in window) {
         const ndef = new NDEFReader();
         ndef.scan().then(()=>{
@@ -551,9 +557,8 @@ startButton.addEventListener("click", ()=>{
             ndef.onreading = (event)=>{
                 log("NDEF message read.");
                 log(event.serialNumber);
-                log(event.message.records.map((v, i, a)=>{
-                    JSON.stringify(v);
-                }).join("\n"));
+                // log(event.message.records.map((v, i, a) => {JSON.stringify(v)}).join("\n"));
+                pushData(event.serialNumber);
             };
         }).catch((error)=>{
             log(`Error! Scan failed to start: ${error}.`);
@@ -599,55 +604,25 @@ function pushData(serialNumber) {
         alert("請先登入");
         return;
     }
+    const data = {
+        devid: devid,
+        serialNumber: serialNumber,
+        timestamp: Date.now()
+    };
     // Create a new post reference with an auto-generated id
     const db = (0, _database.getDatabase)();
     const postListRef = (0, _database.ref)(db, `NFC`);
     const newPostRef = (0, _database.push)(postListRef);
     (0, _database.set)(newPostRef, {
-        devid: devid,
-        serialNumber: serialNumber,
-        timestamp: Date.now()
+        ...data
+    }).then(()=>{
+        log(JSON.stringify(data));
+    }).catch((reason)=>{
+        alert(reason);
     });
 }
 
-},{"fce9dcdd8e6c6e32":"3aTQh","firebase/auth":"drt1f","firebase/database":"bpqHw","./firebaseApp":"4DDUW"}],"3aTQh":[function(require,module,exports) {
-module.exports = require("./helpers/bundle-url").getBundleURL("7UhFu") + "sw.js" + "?" + Date.now();
-
-},{"./helpers/bundle-url":"lgJ39"}],"lgJ39":[function(require,module,exports) {
-"use strict";
-var bundleURL = {};
-function getBundleURLCached(id) {
-    var value = bundleURL[id];
-    if (!value) {
-        value = getBundleURL();
-        bundleURL[id] = value;
-    }
-    return value;
-}
-function getBundleURL() {
-    try {
-        throw new Error();
-    } catch (err) {
-        var matches = ("" + err.stack).match(/(https?|file|ftp|(chrome|moz|safari-web)-extension):\/\/[^)\n]+/g);
-        if (matches) // The first two stack frames will be this function and getBundleURLCached.
-        // Use the 3rd one, which will be a runtime in the original bundle.
-        return getBaseURL(matches[2]);
-    }
-    return "/";
-}
-function getBaseURL(url) {
-    return ("" + url).replace(/^((?:https?|file|ftp|(chrome|moz|safari-web)-extension):\/\/.+)\/[^/]+$/, "$1") + "/";
-} // TODO: Replace uses with `new URL(url).origin` when ie11 is no longer supported.
-function getOrigin(url) {
-    var matches = ("" + url).match(/(https?|file|ftp|(chrome|moz|safari-web)-extension):\/\/[^/]+/);
-    if (!matches) throw new Error("Origin not found");
-    return matches[0];
-}
-exports.getBundleURL = getBundleURLCached;
-exports.getBaseURL = getBaseURL;
-exports.getOrigin = getOrigin;
-
-},{}],"drt1f":[function(require,module,exports) {
+},{"firebase/auth":"drt1f","firebase/database":"bpqHw","./firebaseApp":"4DDUW"}],"drt1f":[function(require,module,exports) {
 var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
 parcelHelpers.defineInteropFlag(exports);
 var _auth = require("@firebase/auth");
