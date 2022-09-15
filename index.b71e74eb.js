@@ -538,6 +538,7 @@ var _firebaseApp = require("./firebaseApp");
 (0, _firebaseApp.firebaseAppInit)();
 const startButton = window.document.getElementById("start");
 const logText = window.document.getElementById("log");
+const placeText = window.document.getElementById("place");
 let devid = "None";
 /*
 if ('serviceWorker' in navigator) {
@@ -546,7 +547,6 @@ if ('serviceWorker' in navigator) {
     {type: 'module'}
   );
 }*/ startButton.addEventListener("click", ()=>{
-    pushData("start");
     if ("NDEFReader" in window) {
         const ndef = new NDEFReader();
         ndef.scan().then(()=>{
@@ -558,7 +558,7 @@ if ('serviceWorker' in navigator) {
                 log("NDEF message read.");
                 log(event.serialNumber);
                 // log(event.message.records.map((v, i, a) => {JSON.stringify(v)}).join("\n"));
-                pushData(event.serialNumber);
+                pushData(event.serialNumber, devid);
             };
         }).catch((error)=>{
             log(`Error! Scan failed to start: ${error}.`);
@@ -567,6 +567,7 @@ if ('serviceWorker' in navigator) {
 });
 function log(message) {
     logText.value += message + "\n";
+    logText.scrollTop = logText.scrollHeight - logText.clientHeight;
 }
 [
     1,
@@ -591,6 +592,7 @@ function signInWithId(id) {
     (0, _auth.signInWithEmailAndPassword)(auth, email, password).then((userCredential)=>{
         // Signed in 
         const user = userCredential.user;
+        placeText.textContent = devid;
         alert(user.email + "登入成功");
     }).catch((error)=>{
         const errorCode = error.code;
@@ -598,14 +600,26 @@ function signInWithId(id) {
         alert(`登入失敗!${errorCode}\n${errorMessage}`);
     });
 }
-function pushData(serialNumber) {
+const send1000Button = window.document.getElementById("send1000");
+const randomsendButton = window.document.getElementById("randomsend");
+send1000Button.onclick = (ev)=>{
+    for(let i = 0; i < 300; i++){
+        const tempPlace = "place_" + Math.floor(Math.random() * 8);
+        if (!pushData("test" + i % 80, tempPlace)) return;
+    }
+};
+randomsendButton.onclick = (ev)=>{
+    const tempPlace = "place_" + Math.floor(Math.random() * 8);
+    if (!pushData("test" + Math.floor(Math.random() * 80), tempPlace)) return;
+};
+function pushData(serialNumber, placeName) {
     const user = (0, _auth.getAuth)().currentUser;
     if (!user) {
         alert("請先登入");
-        return;
+        return false;
     }
     const data = {
-        devid: devid,
+        placeName: placeName,
         serialNumber: serialNumber,
         timestamp: Date.now()
     };
@@ -620,6 +634,7 @@ function pushData(serialNumber) {
     }).catch((reason)=>{
         alert(reason);
     });
+    return true;
 }
 
 },{"firebase/auth":"drt1f","firebase/database":"bpqHw","./firebaseApp":"4DDUW"}],"drt1f":[function(require,module,exports) {
