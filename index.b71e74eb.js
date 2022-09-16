@@ -536,17 +536,40 @@ var _database = require("firebase/database");
 var _auth = require("firebase/auth");
 var _firebaseApp = require("./firebaseApp");
 (0, _firebaseApp.firebaseAppInit)();
+(0, _auth.signInWithEmailAndPassword)((0, _auth.getAuth)(), "hsc000@gmail.com", "hsc000").then((userCredential)=>{
+    const user = userCredential.user;
+// alert(user.email + "載入完成");
+}).catch((error)=>{
+    const errorCode = error.code;
+    const errorMessage = error.message;
+    alert(`登入失敗!${errorCode}\n${errorMessage}`);
+});
 const startButton = window.document.getElementById("start");
 const logText = window.document.getElementById("log");
 const placeText = window.document.getElementById("place");
-let devid = "None";
-/*
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register(
-    new URL('sw.ts', import.meta.url),
-    {type: 'module'}
-  );
-}*/ startButton.addEventListener("click", ()=>{
+const placeNames = [
+    "健檢櫃台",
+    "身高體重",
+    "血壓脈搏",
+    "心電檢查",
+    "家醫診斷",
+    "抽血檢查",
+    "X光檢查",
+    "牙醫檢查",
+    "眼科檢查"
+];
+let placeName = "None";
+const buttonGroup = window.document.getElementById(`buttonGroup`);
+placeNames.map((v, i, a)=>{
+    var button = document.createElement("button");
+    button.textContent = v;
+    button.className = "btn btn-success";
+    buttonGroup.appendChild(button);
+    button.onclick = ()=>{
+        placeName = v;
+    };
+});
+startButton.addEventListener("click", ()=>{
     if ("NDEFReader" in window) {
         const ndef = new NDEFReader();
         ndef.scan().then(()=>{
@@ -558,7 +581,7 @@ if ('serviceWorker' in navigator) {
                 log("NDEF message read.");
                 log(event.serialNumber);
                 // log(event.message.records.map((v, i, a) => {JSON.stringify(v)}).join("\n"));
-                pushData(event.serialNumber, devid);
+                pushData(event.serialNumber, placeName);
             };
         }).catch((error)=>{
             log(`Error! Scan failed to start: ${error}.`);
@@ -569,46 +592,15 @@ function log(message) {
     logText.value += message + "\n";
     logText.scrollTop = logText.scrollHeight - logText.clientHeight;
 }
-[
-    1,
-    2,
-    3,
-    4,
-    5,
-    6,
-    7,
-    8
-].map((v)=>{
-    const loginButton = window.document.getElementById(`login${v}`);
-    loginButton.onclick = ()=>{
-        signInWithId(v);
-    };
-});
-function signInWithId(id) {
-    const email = `hsc00${id}@gmail.com`;
-    const password = `hsc00${id}`;
-    devid = `hsc00${id}`;
-    const auth = (0, _auth.getAuth)();
-    (0, _auth.signInWithEmailAndPassword)(auth, email, password).then((userCredential)=>{
-        // Signed in 
-        const user = userCredential.user;
-        placeText.textContent = devid;
-        alert(user.email + "登入成功");
-    }).catch((error)=>{
-        const errorCode = error.code;
-        const errorMessage = error.message;
-        alert(`登入失敗!${errorCode}\n${errorMessage}`);
-    });
-}
 const send1000Button = window.document.getElementById("send1000");
 const randomsendButton = window.document.getElementById("randomsend");
-send1000Button.onclick = (ev)=>{
+if (send1000Button) send1000Button.onclick = (ev)=>{
     for(let i = 0; i < 300; i++){
         const tempPlace = "place_" + Math.floor(Math.random() * 8);
         if (!pushData("test" + i % 80, tempPlace)) return;
     }
 };
-randomsendButton.onclick = (ev)=>{
+if (randomsendButton) randomsendButton.onclick = (ev)=>{
     const tempPlace = "place_" + Math.floor(Math.random() * 8);
     if (!pushData("test" + Math.floor(Math.random() * 80), tempPlace)) return;
 };
