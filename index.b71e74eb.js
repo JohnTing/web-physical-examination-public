@@ -142,14 +142,14 @@
       this[globalName] = mainExports;
     }
   }
-})({"cpbn2":[function(require,module,exports) {
+})({"iJYvl":[function(require,module,exports) {
 "use strict";
 var global = arguments[3];
 var HMR_HOST = null;
 var HMR_PORT = null;
 var HMR_SECURE = false;
-var HMR_ENV_HASH = "767298212a9fba37";
-module.bundle.HMR_BUNDLE_ID = "52c71a81c33f8fbb";
+var HMR_ENV_HASH = "d6ea1d42532a7575";
+module.bundle.HMR_BUNDLE_ID = "5c1b77e3b71e74eb";
 /* global HMR_HOST, HMR_PORT, HMR_ENV_HASH, HMR_SECURE, chrome, browser, globalThis, __parcel__import__, __parcel__importScripts__, ServiceWorkerGlobalScope */ /*::
 import type {
   HMRAsset,
@@ -531,41 +531,256 @@ function hmrAcceptRun(bundle, id) {
     acceptedAssets[id] = true;
 }
 
-},{}],"kJatA":[function(require,module,exports) {
-var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
-parcelHelpers.defineInteropFlag(exports);
-self.addEventListener("install", (e)=>{
-/*
-    e.waitUntil(
-      caches.open('mystore').then((cache) => cache.addAll([
-      ])),
-    );
-*/ });
-self.addEventListener("fetch", (e)=>{
-/*
-    console.log(e.request.url);
-    e.respondWith(
-      caches.match(e.request).then((response) => response || fetch(e.request)),
-    );
-*/ }); /*
-const cacheName = 'pePWA-v1';
+},{}],"h7u1C":[function(require,module,exports) {
+var _customAudio = require("./customAudio");
+require("4b5318bdea8ead24").then((app)=>{
+    pushData = app.pushData;
+    const firebaseStatus = window.document.getElementById(`firebaseStatus`);
+    firebaseStatus.textContent = "載入完畢，連線至資料庫...";
+});
+let pushData = (a, b)=>{
+    return new Promise(()=>{
+        alert("firebase 還未載入完畢。");
+        return false;
+    });
+};
+const startButton = window.document.getElementById("start");
+const logText = window.document.getElementById("logText");
+const placeText = window.document.getElementById("place");
+const testButton = window.document.getElementById("testButton");
+const buttonGroup = window.document.getElementById(`buttonGroup`);
+const nfcText = window.document.getElementById("nfcText");
+const pageButton = window.document.getElementById("pageButton");
+const pagea = window.document.getElementById("pagea");
+const startSound = window.document.getElementById("startSound");
+// const mySound = document.getElementById("mySound") as HTMLAudioElement;
+const showId = window.document.getElementById("showId");
+const showTime = window.document.getElementById("showTime");
+const places = {
+    報到: [
+        "健檢櫃台"
+    ],
+    體檢大樓: [
+        "基礎檢查",
+        "心電檢查",
+        "家醫診斷",
+        "抽血檢查"
+    ],
+    醫療大樓: [
+        "X光檢查",
+        "眼科檢查"
+    ],
+    牙科: [
+        "牙醫檢查"
+    ]
+};
+Object.keys(places).forEach((v, i, a)=>{
+    addButton(places[v]);
+});
+let placeSetting = localStorage.getItem("placeSetting");
+if (placeSetting) placeText.textContent = placeSetting;
+function addButton(placeNames) {
+    placeNames.map((v, i, a)=>{
+        var button = document.createElement("button");
+        button.textContent = v;
+        button.className = "btn btn-success";
+        button.onclick = ()=>{
+            placeText.textContent = v;
+            localStorage.setItem("placeSetting", placeText.textContent);
+        };
+        buttonGroup.appendChild(button);
+    });
+}
+pageButton.onclick = ()=>{
+    console.log(pagea.style.visibility);
+    if (pagea.style.visibility == "hidden") {
+        const password = prompt("輸入開發密碼") || "";
+        if (password == "1234") pagea.style.visibility = "";
+    } else pagea.style.visibility = "hidden";
+};
+setTimeout(()=>{
+    nfcText.textContent = "NFC 啟動中...";
+    setTimeout(startNFC, 500);
+}, 500);
+startButton.onclick = startNFC;
+function startNFC() {
+    if ("NDEFReader" in window) {
+        const ndef = new NDEFReader();
+        ndef.scan().then(()=>{
+            nfcText.textContent = "NFC 已啟動";
+            // bell();
+            log("Scan started successfully.");
+            ndef.onreadingerror = ()=>{
+                log("Cannot read data from the NFC tag. Try another one?");
+            };
+            ndef.onreading = (event)=>{
+                log("NDEF message read.");
+                log(event.serialNumber);
+                // log(event.message.records.map((v, i, a) => {JSON.stringify(v)}).join("\n"));
+                pushData(event.serialNumber, placeText.textContent + "").then((success)=>{
+                    if (success) {
+                        showInfo(event.serialNumber);
+                        (0, _customAudio.bell)();
+                    }
+                });
+            };
+        }).catch((error)=>{
+            nfcText.textContent = "NFC 啟動失敗";
+            log(`Error! Scan failed to start: ${error}.`);
+        });
+    } else {
+        nfcText.textContent = "NFC 啟動失敗";
+        log("NDEFReader not in window");
+    }
+}
+function log(message) {
+    logText.value += message + "\n";
+    logText.scrollTop = logText.scrollHeight - logText.clientHeight;
+    if (logText.value.length > 5000) logText.value = logText.value.substring(logText.value.length - 5000);
+}
+function showInfo(text, timeStr = "") {
+    const now = new Date();
+    let timeText = timeStr || now.getHours() + ":" + now.getMinutes() + ":" + now.getSeconds();
+    showId.textContent = text;
+    showTime.textContent = timeText;
+}
+var timeoutID = -1;
+startSound.onclick = ()=>{
+    (0, _customAudio.bell)();
+    clearTimeout(timeoutID);
+    setTimeout(()=>{
+        showInfo(" ", " ");
+    }, 5000);
+};
 
-self.addEventListener('fetch', (e) => {
-  e.respondWith((async () => {
-    const r = await caches.match(e.request);
-    console.log(`[Service Worker] Fetching resource: ${e.request.url}`);
-    if (r) { return r; }
-    const response = await fetch(e.request);
-    const cache = await caches.open(cacheName);
-    console.log(`[Service Worker] Caching new resource: ${e.request.url}`);
-    cache.put(e.request, response.clone());
-    return response;
-  })());
+},{"4b5318bdea8ead24":"cxdNm","./customAudio":"7cc1v"}],"cxdNm":[function(require,module,exports) {
+module.exports = require("./helpers/browser/js-loader")(require("./helpers/bundle-url").getBundleURL("7UhFu") + "firebaseApp.5cca670b.js" + "?" + Date.now()).catch((err)=>{
+    delete module.bundle.cache[module.id];
+    throw err;
+}).then(()=>module.bundle.root("4DDUW"));
+
+},{"./helpers/browser/js-loader":"61B45","./helpers/bundle-url":"lgJ39"}],"61B45":[function(require,module,exports) {
+"use strict";
+var cacheLoader = require("../cacheLoader");
+module.exports = cacheLoader(function(bundle) {
+    return new Promise(function(resolve, reject) {
+        // Don't insert the same script twice (e.g. if it was already in the HTML)
+        var existingScripts = document.getElementsByTagName("script");
+        if ([].concat(existingScripts).some(function isCurrentBundle(script) {
+            return script.src === bundle;
+        })) {
+            resolve();
+            return;
+        }
+        var preloadLink = document.createElement("link");
+        preloadLink.href = bundle;
+        preloadLink.rel = "preload";
+        preloadLink.as = "script";
+        document.head.appendChild(preloadLink);
+        var script = document.createElement("script");
+        script.async = true;
+        script.type = "text/javascript";
+        script.src = bundle;
+        script.onerror = function(e) {
+            var error = new TypeError("Failed to fetch dynamically imported module: ".concat(bundle, ". Error: ").concat(e.message));
+            script.onerror = script.onload = null;
+            script.remove();
+            reject(error);
+        };
+        script.onload = function() {
+            script.onerror = script.onload = null;
+            resolve();
+        };
+        document.getElementsByTagName("head")[0].appendChild(script);
+    });
 });
 
-*/ 
+},{"../cacheLoader":"j49pS"}],"j49pS":[function(require,module,exports) {
+"use strict";
+var cachedBundles = {};
+var cachedPreloads = {};
+var cachedPrefetches = {};
+function getCache(type) {
+    switch(type){
+        case "preload":
+            return cachedPreloads;
+        case "prefetch":
+            return cachedPrefetches;
+        default:
+            return cachedBundles;
+    }
+}
+module.exports = function(loader, type) {
+    return function(bundle) {
+        var cache = getCache(type);
+        if (cache[bundle]) return cache[bundle];
+        return cache[bundle] = loader.apply(null, arguments).catch(function(e) {
+            delete cache[bundle];
+            throw e;
+        });
+    };
+};
 
-},{"@parcel/transformer-js/src/esmodule-helpers.js":"jRKQF"}],"jRKQF":[function(require,module,exports) {
+},{}],"lgJ39":[function(require,module,exports) {
+"use strict";
+var bundleURL = {};
+function getBundleURLCached(id) {
+    var value = bundleURL[id];
+    if (!value) {
+        value = getBundleURL();
+        bundleURL[id] = value;
+    }
+    return value;
+}
+function getBundleURL() {
+    try {
+        throw new Error();
+    } catch (err) {
+        var matches = ("" + err.stack).match(/(https?|file|ftp|(chrome|moz|safari-web)-extension):\/\/[^)\n]+/g);
+        if (matches) // The first two stack frames will be this function and getBundleURLCached.
+        // Use the 3rd one, which will be a runtime in the original bundle.
+        return getBaseURL(matches[2]);
+    }
+    return "/";
+}
+function getBaseURL(url) {
+    return ("" + url).replace(/^((?:https?|file|ftp|(chrome|moz|safari-web)-extension):\/\/.+)\/[^/]+$/, "$1") + "/";
+} // TODO: Replace uses with `new URL(url).origin` when ie11 is no longer supported.
+function getOrigin(url) {
+    var matches = ("" + url).match(/(https?|file|ftp|(chrome|moz|safari-web)-extension):\/\/[^/]+/);
+    if (!matches) throw new Error("Origin not found");
+    return matches[0];
+}
+exports.getBundleURL = getBundleURLCached;
+exports.getBaseURL = getBaseURL;
+exports.getOrigin = getOrigin;
+
+},{}],"7cc1v":[function(require,module,exports) {
+var parcelHelpers = require("@parcel/transformer-js/src/esmodule-helpers.js");
+parcelHelpers.defineInteropFlag(exports);
+parcelHelpers.export(exports, "bell", ()=>bell);
+function bell() {
+    beep(100, 0.2, 885, "triangle");
+// mySound.play();
+}
+const audioCtx = new AudioContext();
+function beep(volume, duration, frequency, type) {
+    volume /= 100;
+    duration *= 1000;
+    var oscillator = audioCtx.createOscillator();
+    var gainNode = audioCtx.createGain();
+    oscillator.connect(gainNode);
+    gainNode.connect(audioCtx.destination);
+    gainNode.gain.value = volume;
+    oscillator.frequency.value = frequency;
+    oscillator.type = type;
+    oscillator.start();
+    setTimeout(function() {
+        oscillator.stop();
+    }, duration);
+}
+
+},{"@parcel/transformer-js/src/esmodule-helpers.js":"gkKU3"}],"gkKU3":[function(require,module,exports) {
 exports.interopDefault = function(a) {
     return a && a.__esModule ? a : {
         default: a
@@ -595,6 +810,6 @@ exports.export = function(dest, destName, get) {
     });
 };
 
-},{}]},["cpbn2","kJatA"], "kJatA", "parcelRequire94c2")
+},{}]},["iJYvl","h7u1C"], "h7u1C", "parcelRequire94c2")
 
-//# sourceMappingURL=sw.js.map
+//# sourceMappingURL=index.b71e74eb.js.map
