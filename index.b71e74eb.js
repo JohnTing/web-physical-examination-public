@@ -633,7 +633,24 @@ startSound.onclick = ()=>{
     bell();
 };
 function bell() {
-    mySound.play();
+    beep(100, 0.2, 885, "triangle");
+// mySound.play();
+}
+const audioCtx = new AudioContext();
+function beep(volume, duration, frequency, type) {
+    volume /= 100;
+    duration *= 1000;
+    var oscillator = audioCtx.createOscillator();
+    var gainNode = audioCtx.createGain();
+    oscillator.connect(gainNode);
+    gainNode.connect(audioCtx.destination);
+    gainNode.gain.value = volume;
+    oscillator.frequency.value = frequency;
+    oscillator.type = type;
+    oscillator.start();
+    setTimeout(function() {
+        oscillator.stop();
+    }, duration);
 }
 
 },{"4b5318bdea8ead24":"cxdNm"}],"cxdNm":[function(require,module,exports) {
